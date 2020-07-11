@@ -1,0 +1,130 @@
+                            
+                                            Android Studio 
+
+Integer.parseInt : 
+    ----int a = Integer.parseInt(editText.getText().toString());
+    ile String olan editText TextView ı integer a donüştürüp a değerine aktarıldı.
+
+
+
+TextView ların içi boş mu diye sorgulama : 
+    ----editText.getText().toString().matches(""); 
+    böyle oluyor. editText TextView ını matches("") ile sorguluyoruz.
+
+
+
+SharedPreferences : 
+    ----SharedPreferences sharedPreferences=this.getSharedPreferences("com.sametozyurek.storingdata",Context.MODE_PRIVATE); 
+    ile sharedPreferences değerini oluşturuldu. 
+
+    ----String userName="Samet";
+    ----sharedPreferences.edit().putString("savedName",userName).apply();
+    ile userName değeri savedName değerine kaydedildi.
+
+    ----System.out.println("Kayıt edilen değer : "+sharedPreferences.getString("savedName","null"));
+    ile kayıt edilen değer ekrana yazdırıldı.
+
+    ----sharedPreferences.edit().remove("userName").apply();
+    ile kayıt edilen userName değeri silindi.
+
+
+
+Intent intent=new Intent(getApplicationContext(),MainActivity.class); :
+    ----Intent ile yeni bir intent yarattıktan sonra getApplicationContext() ile uygulamanın Context ini alınıyor, daha
+    sonrasında hangi class a ulaşılacağını yazılıyor. Bu intent i çalıştırmak için ise 
+    @@@@@startActivity(intent); yazarak tamamlanıyor.
+
+Intent ler ile sayfalar arası bilgi aktarımı : 
+    ---- İlk sayfada   @@@@@ intent.putExtra("name",userName.getText().toString()); ile aktarılacak değer 'name' değişkenine
+    aktarıldı. İkinci sayfada @@@@ Intent intent=getIntent(); ile yeni bir intent oluşturuldu. Sonrasında ilk sayfadaki değer
+    @@@@ String value=intent.getStringExtra("name"); ile çekilip value değişkenine aktarıldı. İstersek bunu @@@@ textView.setText(value);
+    ile ikinci sayfada yazdırılabilir.
+
+
+
+Geri sayan sayaç yapımı : 
+    @@@@ new CountDownTimer(10000,1000){
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                cdTimer.setText("Kalan süre : "+(millisUntilFinished/1000));
+            }
+
+            @Override
+            public void onFinish() {
+                Toast.makeText(getApplicationContext(),"Zaman doldu.",Toast.LENGTH_LONG).show();
+            }
+        }.start();
+    ---- Parametrelere ilk olarak kaç saniye olağını milisaniye cinsinden yazılır. İkinci parametreye kaç saniye ekliseceğini yazılır.
+    İçerisinde 2 tane method bulundurması gerekli. @@@@ onTick methodu saniye eksildikçe ne olacağını belirtiyoruz. 
+    @@@@ onFinish metodu ise saniye bitince ne olacağını belirtir. Altta küçük bir bildirim gibi bir uyar mesajı çıkarmak için
+    @@@@ Toast.makeText i kullananıldı.
+
+
+
+Uyarı Mesajları : 
+    ---- Öncelikle @@@@ AlertDialog.Builder alert=new AlertDialog.Builder(this); ile alert adında bir AlertDialog Builder oluşturulur.
+    Uyarı mesajının başlığı @@@@ alert.setTitle("Saving"); ile belirlenir. Gösterilecek uyarı mesajı ise @@@@ alert.setMessage("Are you sure?");
+    ile yapılır. Kullanıcıdan bir aksiyon almak için pozitif ve negatif butonların olması gerek bunu da 
+
+    @@@@ alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(),"Saved",Toast.LENGTH_LONG).show();
+            }
+        });
+
+        ile pozitif buton ve içinde ki method la tıklanırsa ne olacağı belirtilir. 
+
+    Negatif buton için ise 
+
+    @@@@ alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(),"Not saved",Toast.LENGTH_LONG).show();
+            }
+        });
+
+        kullanılır ve aynı pozitif gibi içersideki method da ne olacağı belirtilir.
+
+
+
+
+ListView ile Array i bağlama :
+    ----Bir ArrayAdapter oluşturulur.
+        @@@@ ArrayAdapter arrayAdapter=new ArrayAdapter(this,R.layout.support_simple_spinner_dropdown_item,landmarkList);
+        burada 2. kısında listeleme şekli seçilir sonrasında ise bağlanacak olan listview in adı yazılır.
+
+    ----Oluşturulan ArrayAdapter i işleme almak için : 
+        @@@@ listView.setAdapter(arrayAdapter); parametresine ArrayAdapter ın ismi yazılır.
+
+
+
+Veritabanı Oluşturmak : 
+    ----Bir veritabanı oluşturmak için 
+        @@@@ SQLiteDatabase myDatabase=this.openOrCreateDatabase("Students",MODE_PRIVATE,null);
+        ile Students adında bir veritabanı oluşturuldu.
+    
+    ----Veritabanı içerside bir table oluşturmak için 
+        @@@@ myDatabase.execSQL("CREATE TABLE IF NOT EXISTS students(name VARCHAR,age INT(2))");
+        ile Students veritabanı içerisinde students adında bir table oluşturuldu.
+
+    ----Veritabanına veri girmek için ise 
+    @@@@ myDatabase.execSQL("INSERT INTO students (name,age) VALUES('Samet',21)");
+    ile students table ına name ve age degeri girildi.
+
+Veritabanından veri çekmek : 
+    Öncelikle bir işaretçi oluşturulması gerek bunun için Cursor kullanılır : 
+        @@@@ Cursor cursor =myDatabase.rawQuery("SELECT * from students",null);
+        ile bir cursor oluşturuldu. Daha sonra çekilmek istenen verilerin belirlenmesi gerekir. Bunuda : 
+        @@@@ int nameIx=cursor.getColumnIndex("name"); ile name değerinin valuesini aldık.
+        @@@@ int ageIx=cursor.getColumnIndex("age"); ile ise age değerinin valuesini aldık.
+        Sonrasında Cursor a başlaması için bir komut veriyoruz : 
+        @@@@ cursor.moveToFirst(); cursor a baştan başla komutunu verdik
+        Sonrasın da while döngüsü ile verileri yazdırıyoruz.
+        @@@@ while (cursor!=null){
+                System.out.println("Name : "+cursor.getString(nameIx));
+                System.out.println("Age : "+cursor.getString(ageIx));
+
+                cursor.moveToNext();
+            }
